@@ -9,6 +9,7 @@ Other noteworthy APIs:
 - Apollo
 - MockK
 - kotest
+- Turbine
 - paparazzi
 - Robolectric
 

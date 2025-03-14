@@ -15,8 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CharacterDetailsScreenViewModel @Inject internal constructor(
-    private val saveStateHandle: SavedStateHandle,
-    private val loadCharacterDetailsUseCase: LoadCharacterDetailsUseCase
+    savedStateHandle: SavedStateHandle,
+    loadCharacterDetailsUseCase: LoadCharacterDetailsUseCase
 ) : ViewModel() {
 
     sealed interface UiState {
@@ -37,7 +37,7 @@ class CharacterDetailsScreenViewModel @Inject internal constructor(
         }
 
     val uiState: StateFlow<UiState> =
-        loadCharacterDetailsUseCase(saveStateHandle).mapLatest(::mapState).stateIn(
+        loadCharacterDetailsUseCase(savedStateHandle).mapLatest(::mapState).stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = UiState.Initial
