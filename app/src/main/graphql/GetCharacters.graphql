@@ -1,0 +1,17 @@
+query GetCharacters($page: Int!) {
+  characters(page: $page) {
+    pageInfo: info {
+      count
+      prev
+      next
+      pages
+
+    }
+    results {
+      id
+      name
+      imageUrl: image
+      status
+    }
+  }
+}
