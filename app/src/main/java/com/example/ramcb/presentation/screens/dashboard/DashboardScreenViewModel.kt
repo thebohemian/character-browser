@@ -2,23 +2,23 @@ package com.example.ramcb.presentation.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ramcb.data.repository.character.CharacterRepository
 import com.example.ramcb.data.repository.model.CharacterPreview
 import com.example.ramcb.data.repository.model.LoadResult
 import com.example.ramcb.data.repository.model.Paginated
+import com.example.ramcb.presentation.screens.dashboard.usecase.LoadPaginatedCharacterPreviewListUseCase
+import com.example.ramcb.presentation.screens.dashboard.usecase.LoadPaginatedCharacterPreviewListUseCase.Data
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class DashboardScreenViewModel @Inject internal constructor(
-    private val characterRepository: CharacterRepository
+    loadPaginatedCharacterPreviewListUseCase: LoadPaginatedCharacterPreviewListUseCase
 ) : ViewModel() {
 
     sealed interface UiState {
@@ -33,61 +33,35 @@ class DashboardScreenViewModel @Inject internal constructor(
 
     private var lastResponse: LoadResult<Paginated<List<CharacterPreview>>> = LoadResult.None
 
-    private data class Data(
-        val page: Int = 1,
-        val accumulatedData: Map<Int, List<CharacterPreview>> = emptyMap(),
-        val lastResponse: LoadResult<Paginated<List<CharacterPreview>>> = LoadResult.None
-    )
-
     private val page = MutableStateFlow(1)
 
-    private val response = page.flatMapLatest { characterRepository.getCharacterPreviews(it) }
-
-    private val data = response.scan(Data(), ::mapData)
-
-    private fun mapData(
-        currentData: Data,
-        response: LoadResult<Paginated<List<CharacterPreview>>>,
-    ) = when (response) {
-        is LoadResult.None -> currentData
-        is LoadResult.Loading -> currentData.copy(
-            lastResponse = response
-        )
-
-        is LoadResult.Error -> Data()
-        is LoadResult.Success -> {
-            val page = response.model.page
-            currentData.copy(
-                accumulatedData = currentData.accumulatedData + (page to response.model.data),
-                lastResponse = response
+    val uiState: StateFlow<UiState> =
+        loadPaginatedCharacterPreviewListUseCase(page)
+            .onEach {
+                // allows onLoadNextPage() to decide immediately how to modify the page
+                // not a nice approach in the sense, that this is a side-effect in flow
+                // handling
+                lastResponse = it.lastResponse
+            }
+            .mapLatest(::mapState).stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = UiState.Initial
             )
-        }
-    }.also {
-        // unhappy: side-effect
-        lastResponse = response
-    }
-
-    private fun flattenData(data: Data) = data.accumulatedData.toSortedMap().values.flatten()
 
     private fun mapState(data: Data) = when (data.lastResponse) {
         is LoadResult.None -> UiState.LoadingInitially(0)
         is LoadResult.Loading -> {
-            if (data.accumulatedData.isEmpty()) {
+            if (data.isEmpty()) {
                 UiState.LoadingInitially(50)
             } else {
-                UiState.ContentAvailable(flattenData(data), isLoadingMore = true)
+                UiState.ContentAvailable(data.flatten(), isLoadingMore = true)
             }
         }
 
         is LoadResult.Error -> UiState.Error
-        is LoadResult.Success -> UiState.ContentAvailable(flattenData(data))
+        is LoadResult.Success -> UiState.ContentAvailable(data.flatten())
     }
-
-    val uiState: StateFlow<UiState> = data.mapLatest(::mapState).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = UiState.Initial
-    )
 
     fun onDashboardClick() {
         // do not yet

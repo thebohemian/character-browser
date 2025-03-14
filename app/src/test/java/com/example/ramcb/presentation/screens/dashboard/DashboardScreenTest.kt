@@ -22,7 +22,9 @@ class DashboardScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val viewModel = mockk<DashboardScreenViewModel>()
+    private val viewModel = mockk<DashboardScreenViewModel> {
+        every { onLoadNextPage() } just runs
+    }
 
     @Test
     fun `click on dashboard should invoke onDashboardClick()`() {
