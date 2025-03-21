@@ -3,14 +3,13 @@ package com.example.ramcb.presentation.views
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.example.ramcb.data.repository.model.CharacterPreview
 
 @Composable
@@ -46,7 +45,7 @@ fun CharacterPreviewList(
 ) {
     LazyColumn(
         state = state,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.testTag("characterPreviewList").fillMaxSize()
     ) {
         if (characterPreviews.isNotEmpty()) {
             items(

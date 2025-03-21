@@ -42,7 +42,7 @@ fun DashboardScreen(
                     onGoToCharacterDetails,
                     viewModel::onLoadNextPage,
                     s.characterPreviews,
-                    listState,
+                    listState
                 )
 
                 if (s.isLoadingMore) {

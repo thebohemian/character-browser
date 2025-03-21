@@ -1,4 +1,4 @@
 <resources>
 
-    <style name="Theme.MyATV" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.CharacterBrowser" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

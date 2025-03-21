@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.androidTestUtil
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -24,9 +26,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        defaultConfig {
-            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
+
+        testApplicationId = "$applicationId.test"
+        testInstrumentationRunner = "io.cucumber.android.runner.CucumberAndroidJUnitRunner"
     }
 
     buildTypes {
@@ -120,4 +122,10 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.property)
+
+    // Instrumentation tests
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.cucumber)
+    androidTestImplementation(libs.cucumber.picocontainer)
+    androidTestUtil(libs.test.orchestrator)
 }
