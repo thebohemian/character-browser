@@ -11,10 +11,17 @@ Feature: Use CharacterBrowser
     Then "Rick Sanchez" is shown
     Then the character is a "Human"
 
-  Scenario: Scroll in the character list
+  Scenario Outline: Scroll in the character list
     Given I open the app
-    When I scroll to "Alien Morty"
-    Then "Alien Morty" is shown
+    When I scroll to "<character>"
+    Then "<character>" is shown
+
+    Examples:
+      | character               |
+      | Alien Morty             |
+      | Amish Cyborg            |
+      | Aqua Morty              |
+      | Artist Morty            |
 
   Scenario: Scroll and show character detail
     Given I open the app
