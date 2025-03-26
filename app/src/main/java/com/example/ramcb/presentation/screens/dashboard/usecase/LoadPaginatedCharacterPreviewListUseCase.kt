@@ -4,6 +4,7 @@ import com.example.ramcb.data.repository.character.CharacterRepository
 import com.example.ramcb.data.repository.model.CharacterPreview
 import com.example.ramcb.data.repository.model.LoadResult
 import com.example.ramcb.data.repository.model.Paginated
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.scan
@@ -30,7 +31,9 @@ class LoadPaginatedCharacterPreviewListUseCase @Inject internal constructor(
             lastResponse = response
         )
 
-        is LoadResult.Error -> Data()
+        is LoadResult.Error -> Data(
+            lastResponse = response
+        )
         is LoadResult.Success -> {
             val page = response.model.page
             currentData.copy(
@@ -40,6 +43,7 @@ class LoadPaginatedCharacterPreviewListUseCase @Inject internal constructor(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(page: Flow<Int>): Flow<Data> =
         page.flatMapLatest { repository.getCharacterPreviews(it) }.scan(Data(), ::mapLoadResult)
 }

@@ -8,6 +8,7 @@ import com.example.ramcb.data.repository.model.Paginated
 import com.example.ramcb.presentation.screens.dashboard.usecase.LoadPaginatedCharacterPreviewListUseCase
 import com.example.ramcb.presentation.screens.dashboard.usecase.LoadPaginatedCharacterPreviewListUseCase.Data
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,7 @@ class DashboardScreenViewModel @Inject internal constructor(
 
     private val page = MutableStateFlow(1)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<UiState> =
         loadPaginatedCharacterPreviewListUseCase(page)
             .onEach {
